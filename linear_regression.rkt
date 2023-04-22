@@ -6,7 +6,7 @@
   (list*->array
    (map (lambda (s)
           (map string->number (string-split s)))
-        (rest (with-input-from-file "/home/nikhil/Downloads/pizza.txt"
+        (rest (with-input-from-file "pizza.txt"
                 port->lines))) number?))
 
 (define (as-X-and-Y data)
