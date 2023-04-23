@@ -1,8 +1,15 @@
 #lang typed/racket
 (require math/array)
 (require math/flonum)
-(require plot)
 
+; All I want to do is to load a file that looks like
+; Reservations  Pizzas
+; 13            33
+; 2             16
+; 14            32
+; ...
+; as an array of floats. The casts are really ugly here, but are required
+; because string->number returns a (U Complex False)
 (: load-data (-> (Array Float)))
 (define (load-data)
   (list*->array
@@ -19,11 +26,6 @@
             (array-slice-ref swapped (list 1 ::...)))))
 
 
-(: pizza-data-base-renderer ((Array Float) -> renderer2d))
-(define (pizza-data-base-renderer data)
-  (points (cast (array->vector* data) (Sequenceof (Sequenceof Float)))
-          #:color "Firebrick"))
-
 (: predict ((Array Float) Float Float -> (Array Float)))
 (define (predict X w b)
   (array+ (array* X (array w)) (array b)))
@@ -33,17 +35,6 @@
   (let ([squared-error (array-sqr (array- (predict X w b) Y))])
     (/ (array-all-sum squared-error) (array-size squared-error))))
 
-(: pizza-plot ((Array Float) Float Float -> Any))
-(define (pizza-plot data w b)
-  (plot (list (pizza-data-base-renderer data)
-              (function (lambda (x) (+ (* x w) b))))
-        #:title "Pizza distribution"
-        #:x-label "Reservations"
-        #:y-label "Pizzas"
-        #:x-min 0
-        #:y-min 0
-        #:x-max 30
-        #:y-max 70))
 
 (: train ((Array Float) (Array Float) Integer Float -> (Values Float Float)))
 (define (train X Y iterations lr)
@@ -63,7 +54,6 @@
     (define-values (X Y) (as-X-and-Y data))
     (define-values (w b) (train X Y 10000 0.01))
     (printf "w=~v b=~v~n" w b)
-    (printf "Number of pizzas for ~v reservations: ~v~n" 20 (predict (array 20.0) w b))
-    #;(pizza-plot data w b)))
+    (printf "Number of pizzas for ~v reservations: ~v~n" 20 (predict (array 20.0) w b))))
 
 (main)
