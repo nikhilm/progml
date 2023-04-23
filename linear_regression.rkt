@@ -37,20 +37,16 @@
         #:y-max 70))
 
 (define (train X Y iterations lr)
-  ; TODO: Make this more idiomatic (probably recursive)
-  (for/fold ([w 0] [b 0] [should-break #f]
-                   #:result (values w b))
-            ([i (in-range 1 iterations)])
-    #:break should-break
+  (let loop ([w 0] [b 0] [iter iterations])
     (define current-loss (loss X Y w b))
-    #;(printf "Iteration ~v -> Loss ~v~n" i current-loss)
     (cond
-      [(< (loss X Y (+ w lr) b) current-loss) (values (+ w lr) b #f)]
-      [(< (loss X Y (- w lr) b) current-loss) (values (- w lr) b #f)]
-      [(< (loss X Y w (+ b lr)) current-loss) (values w (+ b lr) #f)]
-      [(< (loss X Y w (- b lr)) current-loss) (values w (- b lr) #f)]
-      [else (values w b #t)])))
-
+      [(zero? iter) (error "did not converge!")]
+      [(< (loss X Y (+ w lr) b) current-loss) (loop (+ w lr) b (sub1 iter))]
+      [(< (loss X Y (- w lr) b) current-loss) (loop (- w lr) b (sub1 iter))]
+      [(< (loss X Y w (+ b lr)) current-loss) (loop w (+ b lr) (sub1 iter))]
+      [(< (loss X Y w (- b lr)) current-loss) (loop w (- b lr) (sub1 iter))]
+      [else (values w b)])))
+  
 (define (main)
   (let ([data (load-data)])
     (define-values (X Y) (as-X-and-Y data))
