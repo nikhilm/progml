@@ -21,8 +21,7 @@
   (list*->array
    (map (lambda ([s : String]) : (Listof Float)
           (cast (map fl (cast (map string->number (string-split s)) (Listof Integer))) (Listof Float)))
-        (rest (with-input-from-file "pizza.txt"
-                port->lines)))
+        (rest (file->lines "pizza.txt")))
    flonum?))
 
 (: as-X-and-Y ((Array Float) -> (Values (Array Float) (Array Float))))
