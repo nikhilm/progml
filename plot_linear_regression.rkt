@@ -1,6 +1,11 @@
+#lang racket
+
+(require math/array)
+(require math/flonum)
 (require plot)
 
-(: pizza-plot ((Array Float) Float Float -> Any))
+(require "linear_regression.rkt")
+
 (define (pizza-plot data w b)
   (plot (list (pizza-data-base-renderer data)
               (function (lambda (x) (+ (* x w) b))))
@@ -12,9 +17,13 @@
         #:x-max 30
         #:y-max 70))
 
-(: pizza-data-base-renderer ((Array Float) -> renderer2d))
 (define (pizza-data-base-renderer data)
-  (points (cast (array->vector* data) (Sequenceof (Sequenceof Float)))
+  (points (array->vector* data)
           #:color "Firebrick"))
 
-(pizza-plot data w b)
+(module+ main
+  (let ([data (load-data)])
+    (define-values (X Y) (as-X-and-Y data))
+    (define-values (w b) (train X Y 10000 0.01))
+    (define prediction (array-ref (predict (array 20.0) w b) #()))
+    (pizza-plot data w b)))

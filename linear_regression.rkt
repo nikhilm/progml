@@ -2,6 +2,12 @@
 (require math/array)
 (require math/flonum)
 
+(provide load-data
+         train
+         predict
+         as-X-and-Y
+         loss)
+
 ; All I want to do is to load a file that looks like
 ; Reservations  Pizzas
 ; 13            33
@@ -41,6 +47,7 @@
   (let loop : (Values Float Float)
     ([w 0.0] [b 0.0] [iter iterations])
     (define current-loss (loss X Y w b))
+    (printf "current w ~v loss ~v~n" w current-loss)
     (cond
       [(zero? iter) (error "did not converge!")]
       [(< (loss X Y (+ w lr) b) current-loss) (loop (+ w lr) b (sub1 iter))]
@@ -48,12 +55,11 @@
       [(< (loss X Y w (+ b lr)) current-loss) (loop w (+ b lr) (sub1 iter))]
       [(< (loss X Y w (- b lr)) current-loss) (loop w (- b lr) (sub1 iter))]
       [else (values w b)])))
-  
-(define (main)
+
+
+(module+ main
   (let ([data (load-data)])
     (define-values (X Y) (as-X-and-Y data))
     (define-values (w b) (train X Y 10000 0.01))
     (printf "w=~v b=~v~n" w b)
     (printf "Number of pizzas for ~v reservations: ~v~n" 20 (predict (array 20.0) w b))))
-
-(main)
