@@ -58,13 +58,14 @@
   (let loop : (Values Float Float)
     ([w 0.0] [b 0.0] [iter iterations])
     (define current-loss (loss X Y w b))
+    (define iter-1 (sub1 iter))
     #;(printf "current w ~v loss ~v~n" w current-loss)
     (cond
       [(zero? iter) (error "did not converge!")]
-      [(< (loss X Y (+ w lr) b) current-loss) (loop (+ w lr) b (sub1 iter))]
-      [(< (loss X Y (- w lr) b) current-loss) (loop (- w lr) b (sub1 iter))]
-      [(< (loss X Y w (+ b lr)) current-loss) (loop w (+ b lr) (sub1 iter))]
-      [(< (loss X Y w (- b lr)) current-loss) (loop w (- b lr) (sub1 iter))]
+      [(< (loss X Y (+ w lr) b) current-loss) (loop (+ w lr) b iter-1)]
+      [(< (loss X Y (- w lr) b) current-loss) (loop (- w lr) b iter-1)]
+      [(< (loss X Y w (+ b lr)) current-loss) (loop w (+ b lr) iter-1)]
+      [(< (loss X Y w (- b lr)) current-loss) (loop w (- b lr) iter-1)]
       [else (values w b)])))
 
 
