@@ -1,11 +1,12 @@
 #lang typed/racket
 (require math/array)
 (require math/flonum)
+(require math/matrix)
 
 (provide load-data
          train
          predict
-         as-X-and-Y
+         reservations-and-pizzas
          loss)
 
 ; All I want to do is to load a file that looks like
@@ -16,7 +17,7 @@
 ; ...
 ; as an array of floats. The casts are really ugly here, but are required
 ; because string->number returns a (U Complex False)
-(: load-data (-> (Array Float)))
+(: load-data (-> (Matrix Float)))
 (define (load-data)
   
   (define (str->int-list [s : String])
@@ -33,12 +34,10 @@
   (define (line->data line)
     (ints->floats (str->int-list line)))
   
-  (list*->array
-   (map line->data lines)
-   flonum?))
+  (list*->matrix (map line->data lines)))
 
-(: as-X-and-Y ((Array Float) -> (Values (Array Float) (Array Float))))
-(define (as-X-and-Y data)
+(: reservations-and-pizzas ((Array Float) -> (Values (Array Float) (Array Float))))
+(define (reservations-and-pizzas data)
   (let [(swapped (array-axis-swap data 0 1))]
     (values (array-slice-ref swapped (list 0 ::...))
             (array-slice-ref swapped (list 1 ::...)))))
@@ -59,7 +58,7 @@
   (let loop : (Values Float Float)
     ([w 0.0] [b 0.0] [iter iterations])
     (define current-loss (loss X Y w b))
-    (printf "current w ~v loss ~v~n" w current-loss)
+    #;(printf "current w ~v loss ~v~n" w current-loss)
     (cond
       [(zero? iter) (error "did not converge!")]
       [(< (loss X Y (+ w lr) b) current-loss) (loop (+ w lr) b (sub1 iter))]
@@ -70,8 +69,8 @@
 
 
 (module+ main
-  (let ([data (load-data)])
-    (define-values (X Y) (as-X-and-Y data))
-    (define-values (w b) (train X Y 10000 0.01))
-    (printf "w=~v b=~v~n" w b)
-    (printf "Number of pizzas for ~v reservations: ~v~n" 20 (predict (array 20.0) w b))))
+  (define data (load-data))
+  (define-values (X Y) (reservations-and-pizzas data))
+  (define-values (w b) (train X Y 10000 0.01))
+  (printf "w=~v b=~v~n" w b)
+  (printf "Number of pizzas for ~v reservations: ~v~n" 20 (predict (array 20.0) w b)))
