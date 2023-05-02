@@ -18,10 +18,23 @@
 ; because string->number returns a (U Complex False)
 (: load-data (-> (Array Float)))
 (define (load-data)
+  
+  (define (str->int-list [s : String])
+    (cast (map string->number (string-split s)) (Listof Integer)))
+
+  (: ints->floats ((Listof Integer)-> (Listof Float)))
+  (define (ints->floats ints) (map fl ints))
+  
+  ; rest to skip the title lines
+  (define lines (rest (file->lines "pizza.txt")))
+  
+
+  (: line->data (String -> (Listof Float)))
+  (define (line->data line)
+    (ints->floats (str->int-list line)))
+  
   (list*->array
-   (map (lambda ([s : String]) : (Listof Float)
-          (cast (map fl (cast (map string->number (string-split s)) (Listof Integer))) (Listof Float)))
-        (rest (file->lines "pizza.txt")))
+   (map line->data lines)
    flonum?))
 
 (: as-X-and-Y ((Array Float) -> (Values (Array Float) (Array Float))))
