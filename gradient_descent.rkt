@@ -1,6 +1,7 @@
 #lang typed/racket
 (require math/array)
 (require math/flonum)
+(require racket/format)
 
 (provide train
          predict
@@ -30,6 +31,7 @@
 (define (train X Y iterations lr)
   (for/fold ([w 0.0] [b 0.0])
             ([i (in-range 0 iterations)])
+    #;(printf "Iteration ~v => Loss: ~a~n" i (~r (loss X Y w b)))
     (define-values (w_grad b_grad) (gradient X Y w b))
     (values
      (- w (* w_grad lr))
