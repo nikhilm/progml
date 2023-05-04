@@ -10,7 +10,7 @@
 
 (: predict ((Array Float) Float Float -> (Array Float)))
 (define (predict X w b)
-  (array+ (array* X (array w)) (array b)))
+  (array+ (array-scale X w) (array b)))
 
 (: loss ((Array Float) (Array Float) Float Float -> Float))
 (define (loss X Y w b)
