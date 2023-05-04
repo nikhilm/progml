@@ -25,6 +25,7 @@
           #:color "Firebrick"))
 
 (module+ main
+  (require "pizza_data.rkt")
   (define data (load-data))
   (define-values (X Y) (reservations-and-pizzas data))
   (define-values (w b) (train X Y 10000 0.01))

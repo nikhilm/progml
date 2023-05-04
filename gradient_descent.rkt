@@ -2,34 +2,9 @@
 (require math/array)
 (require math/flonum)
 
-(provide load-data
-         train
+(provide train
          predict
-         as-X-and-Y
          loss)
-
-; All I want to do is to load a file that looks like
-; Reservations  Pizzas
-; 13            33
-; 2             16
-; 14            32
-; ...
-; as an array of floats. The casts are really ugly here, but are required
-; because string->number returns a (U Complex False)
-(: load-data (-> (Array Float)))
-(define (load-data)
-  (list*->array
-   (map (lambda ([s : String]) : (Listof Float)
-          (cast (map fl (cast (map string->number (string-split s)) (Listof Integer))) (Listof Float)))
-        (rest (file->lines "pizza.txt")))
-   flonum?))
-
-(: as-X-and-Y ((Array Float) -> (Values (Array Float) (Array Float))))
-(define (as-X-and-Y data)
-  (let [(swapped (array-axis-swap data 0 1))]
-    (values (array-slice-ref swapped (list 0 ::...))
-            (array-slice-ref swapped (list 1 ::...)))))
-
 
 (: predict ((Array Float) Float Float -> (Array Float)))
 (define (predict X w b)
@@ -62,8 +37,9 @@
 
 
 (module+ main
+  (require "pizza_data.rkt")
   (let ([data (load-data)])
-    (define-values (X Y) (as-X-and-Y data))
+    (define-values (X Y) (reservations-and-pizzas data))
     (define-values (w b) (train X Y 20000 0.001))
     (printf "w=~v b=~v~n" w b)
     (printf "Number of pizzas for ~v reservations: ~v~n" 20 (predict (array 20.0) w b))))
