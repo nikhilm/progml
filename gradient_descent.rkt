@@ -37,6 +37,25 @@
      (- w (* w_grad lr))
      (- b (* b_grad lr)))))
 
+(struct grad-trace
+  ([w : Float]
+   [b : Float]
+   [w_grad : Float]
+   [b_grad : Float]))
+
+(: trace-train ((Array Float) (Array Float) Integer Float -> (Mutable-Vectorof grad-trace)))
+(define (trace-train X Y iterations lr)
+  (: trace (Mutable-Vectorof grad-trace))
+  (define trace (make-vector iterations (grad-trace 0.0 0.0 0.0 0.0)))
+  (for/fold ([w 0.0] [b 0.0])
+            ([i (in-range 0 iterations)])
+    #;(printf "Iteration ~v => Loss: ~a~n" i (~r (loss X Y w b)))
+    (define-values (w_grad b_grad) (gradient X Y w b))
+    (let ([w (- w (* w_grad lr))]
+          [b (- b (* b_grad lr))])
+      (vector-set! trace i (grad-trace w b w_grad b_grad))
+      (values w b)))
+  trace)
 
 (module+ main
   (require "pizza_data.rkt")
@@ -44,4 +63,6 @@
   (define-values (X Y) (reservations-and-pizzas data))
   (define-values (w b) (train X Y 20000 0.001))
   (printf "w=~v b=~v~n" w b)
-  (printf "Number of pizzas for ~v reservations: ~v~n" 20 (array-ref (predict (array 20.0) w b) #())))
+  (printf "Number of pizzas for ~v reservations: ~v~n" 20 (array-ref (predict (array 20.0) w b) #()))
+  
+  (printf "~v~n" (trace-train X Y 20000 0.001)))
