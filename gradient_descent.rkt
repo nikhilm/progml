@@ -6,7 +6,8 @@
 (provide train
          trace-train
          predict
-         loss)
+         loss
+         (struct-out grad-trace))
 
 (: predict ((Array Float) Float Float -> (Array Float)))
 (define (predict X w b)
