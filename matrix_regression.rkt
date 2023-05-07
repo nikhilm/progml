@@ -29,18 +29,19 @@
     (matrix-map sqr (matrix- (predict X w) Y)))
   (matrix-avg squared-error))
 
-(: gradient ((Matrix Float) (Matrix Float) (Matrix Float) -> (Matrix Float)))
-(define (gradient X Y w)
-  (define mult (matrix* (matrix-transpose X) (matrix- (predict X w) Y)))
+(: gradient ((Matrix Float) (Matrix Float) (Matrix Float) (Matrix Float) -> (Matrix Float)))
+(define (gradient X Y w X_T)
+  (define mult (matrix* X_T (matrix- (predict X w) Y)))
   (matrix-scale (matrix-scale mult 2.0) (fl (/ (matrix-num-rows X)))))
 
 (: train ((Matrix Float) (Matrix Float) Exact-Nonnegative-Integer Float . -> . (Matrix Float)))
 (define (train X Y iterations lr)
+  (define X_T (matrix-transpose X))
   (for/fold
    ([w (make-matrix-float (matrix-num-cols X) 1 (fl 0))])
    ([i (in-range iterations)])
     #;(printf "Iteration ~v => Loss: ~v~n" i (loss X Y w))
-    (matrix- w (matrix-scale (gradient X Y w) lr))))
+    (matrix- w (matrix-scale (gradient X Y w X_T) lr))))
 
 (module+ main
   (define-values (parameters pizzas) (parameters-and-pizzas (load-data #:skip-rows 1)))
