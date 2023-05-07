@@ -1,4 +1,4 @@
-#lang racket
+#lang racket/base
 (require flomat)
 (require "pizza_3_data_flomat.rkt")
 
@@ -20,19 +20,20 @@
 
 (define (loss X Y w)
   (define squared-error
-    (.sqr! (.- (predict X w) Y)))
+    (.sqr! (.-! (predict X w) Y)))
   (matrix-avg squared-error))
 
-(define (gradient X Y w)
-  (define mult (times (transpose X) (.- (predict X w) Y)))
-  (./ (.* mult 2.0) (nrows X)))
+(define (gradient X Y w X_T)
+  (define mult (times X_T (.-! (predict X w) Y)))
+  (./! (.*! mult 2.0) (nrows X)))
 
 (define (train X Y iterations lr)
+  (define X_T (transpose X))
   (for/fold
    ([w (zeros (ncols X) 1)])
    ([i (in-range iterations)])
     #;(printf "Iteration ~v => Loss: ~v~n" i (loss X Y w))
-    (.- w (.* (gradient X Y w) lr))))
+    (.-! w (.*! (gradient X Y w X_T) lr))))
 
 (module+ main
   (define-values (parameters pizzas) (parameters-and-pizzas (load-data #:skip-rows 1)))
