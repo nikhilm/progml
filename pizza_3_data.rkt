@@ -27,3 +27,7 @@
 (define (parameters-and-pizzas [df : (Matrix Float)])
   (define n-cols (matrix-num-cols df))
   (values (submatrix df (::) (:: (sub1 n-cols))) (matrix-col df (sub1 n-cols))))
+
+(module+ main
+  (define-values (params pizzas) (parameters-and-pizzas (load-data #:skip-rows 1)))
+  (printf "Parameters:~v~n~nPizzas:~n~v~n" params pizzas))
