@@ -1,4 +1,7 @@
-#lang racket
+#lang racket/base
+(require racket/string)
+(require racket/file)
+(require racket/port)
 (require flomat)
 
 (provide load-data
