@@ -66,4 +66,5 @@
      (ones (nrows parameters) 1)
      parameters))
   (define w (train parameters-with-bias police 10000 0.001))
+  (printf "weights ~v~n" w)
   (test parameters-with-bias police w))
