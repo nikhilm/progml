@@ -2,11 +2,13 @@
 (require file/gunzip)
 (require racket/match)
 (require flomat)
+(require racket/math)
 
 (provide read-mnist-images
          read-mnist-labels
          prepend-bias
-         encode-fives)
+         encode-fives
+         one-hot-encode)
 
 (define (bytes->mnist-i32 bstr [start 0])
   (integer-bytes->integer
@@ -72,7 +74,16 @@
 (define-pointwise-unary is-5)
 (define (encode-fives M)
   (.is-5 M))
-  
+
+(define (one-hot-encode M)
+  (define n-labels (nrows M))
+  (define n-classes 10)
+  (define encoded (zeros n-labels n-classes))
+  (for ([i (in-range n-labels)])
+    #;
+    (printf "Yo ~v: ~v~n" i (exact-truncate (ref M i 0)))
+    (mset! encoded i (exact-truncate (ref M i 0)) 1.0))
+  encoded)  
 #;
 (require ffi/unsafe)
 #;
